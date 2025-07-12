@@ -14,7 +14,7 @@ Website will be available at: https://quadcore-stackit-platform.onrender.com
 
 > ✅ Built for the Odoo Hackathon '25
 
----
+----
 
 ## 🚀 Features
 
