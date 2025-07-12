@@ -1,0 +1,90 @@
+<!-- question_detail.html -->
+{% extends 'base.html' %}
+{% block content %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<h2>{{ question.title }}</h2>
+<div>{{ question.description | safe }}</div>
+<p><strong>Tags:</strong> {{ question.tags }}</p>
+
+<h3>Answers</h3>
+{% for answer in answers %}
+    <div style="margin-bottom: 20px;" class="border rounded p-3" id="answer-{{ answer.id }}">
+        <div>{{ answer.content | safe }}</div>
+        <div class="d-flex justify-content-between align-items-center">
+            <small>by {{ answer.author.username }}</small>
+            <div>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.id == question.user_id %}
+                        <button class="btn btn-outline-primary btn-sm" onclick="acceptAnswer({{ answer.id }})">✅ Accept</button>
+                    {% endif %}
+
+                    <button class="btn btn-sm btn-outline-success me-1" onclick="voteAnswer({{ answer.id }}, 'upvote')">⬆️</button>
+                    <button class="btn btn-sm btn-outline-danger me-2" onclick="voteAnswer({{ answer.id }}, 'downvote')">⬇️</button>
+                {% endif %}
+
+                <span class="badge bg-info text-dark" id="score-{{ answer.id }}">Score: {{ answer.vote_score }}</span>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+{% if current_user.is_authenticated %}
+<h3>Post Your Answer</h3>
+<form method="POST" action="{{ url_for('post_answer', question_id=question.id) }}">
+    <div id="answer-editor" style="height: 200px;"></div>
+    <input type="hidden" name="content" id="answer-content">
+    <button type="submit" onclick="syncAnswer()" class="btn btn-success mt-2">Post Answer</button>
+</form>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<script>
+    const aEditor = new Quill('#answer-editor', { theme: 'snow' });
+    function syncAnswer() {
+        document.getElementById('answer-content').value = aEditor.root.innerHTML;
+    }
+</script>
+{% else %}
+<p><a href="{{ url_for('login') }}">Login</a> to post an answer.</p>
+{% endif %}
+
+<script>
+function acceptAnswer(answerId) {
+  fetch(`/accept/${answerId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert('Answer accepted!');
+      location.reload();
+    } else {
+      alert('Failed to accept answer.');
+    }
+  })
+  .catch(err => {
+    console.error('Accept error:', err);
+    alert('Error accepting answer.');
+  });
+}
+
+function voteAnswer(answerId, voteType) {
+  fetch(`/vote/${answerId}/${voteType}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.vote_score !== undefined) {
+      document.getElementById(`score-${answerId}`).innerText = `Score: ${data.vote_score}`;
+    } else {
+      alert('Vote failed');
+    }
+  })
+  .catch(err => {
+    console.error('Vote error:', err);
+    alert('Error voting.');
+  });
+}
+</script>
+{% endblock %}

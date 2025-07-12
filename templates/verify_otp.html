@@ -1,0 +1,16 @@
+<!-- verify_otp.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+  <div class="card p-4 shadow">
+    <h3 class="text-center text-primary">OTP Verification</h3>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Enter the OTP sent to your email</label>
+        <input type="text" name="otp" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Verify OTP</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

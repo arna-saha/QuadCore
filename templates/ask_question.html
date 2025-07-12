@@ -1,0 +1,56 @@
+<!-- ask_question.html -->
+{% extends 'base.html' %}
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<div class="container mt-5">
+  <div class="card shadow p-4">
+    <h2 class="mb-4 text-primary">Ask a New Question</h2>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input type="text" name="title" class="form-control" placeholder="Enter a clear and concise title" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <div id="editor-container" class="mb-2" style="height: 200px;"></div>
+        <input type="hidden" name="description" id="description">
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Tags (select or type)</label>
+        <select name="tags" class="form-select select2" multiple="multiple" required>
+          <option value="Python">Python</option>
+          <option value="Flask">Flask</option>
+          <option value="SQL">SQL</option>
+          <option value="JWT">JWT</option>
+          <option value="React">React</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-success px-4" onclick="copyContent()">Post Question</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    $('.select2').select2({ tags: true });
+  });
+
+  const quill = new Quill('#editor-container', {
+    theme: 'snow',
+    placeholder: 'Write your question description here...'
+  });
+
+  function copyContent() {
+    document.getElementById('description').value = quill.root.innerHTML;
+  }
+</script>
+{% endblock %}
