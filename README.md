@@ -7,7 +7,8 @@ Arna Saha- arnasaha0982@gmail.com,
 Anwesa Ghosh- anwesa310@gmail.com,
 Dewan Habib- dewanhabib2004@gmail.com
 
-# 🧠 StackIt - A Minimal Q&A Forum Platform
+# 🧠 StackIt - A Minimal Q&A Forum Platform: 
+Website link: https://quadcore-stackit-platform.onrender.com
 
 **StackIt** is a lightweight, responsive Question-and-Answer platform built with **Flask**, designed for collaborative learning, academic discussions, and community-driven knowledge sharing.
 
