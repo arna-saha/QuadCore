@@ -3,28 +3,64 @@
 {% block content %}
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <div class="container mt-4">
-  <h2 class="mb-4 text-primary">Recent Questions</h2>
-  {% if questions %}
-    <div class="list-group">
-      {% for question in questions %}
-      <a href="{{ url_for('view_question', question_id=question.id) }}" class="list-group-item list-group-item-action mb-2 shadow-sm">
-        <div class="d-flex w-100 justify-content-between">
-          <h5 class="mb-1">{{ question.title }}</h5>
-          <small>{{ question.created_at.strftime('%Y-%m-%d') }}</small>
+    <h2 class="mb-4 text-primary">Recent Questions</h2>
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h2 class="text-primary">Questions</h2>
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('index', filter='newest') }}"
+                class="btn btn-outline-primary {% if filter_type == 'newest' %}active{% endif %}">Newest</a>
+            <a href="{{ url_for('index', filter='unanswered') }}"
+                class="btn btn-outline-warning {% if filter_type == 'unanswered' %}active{% endif %}">Unanswered</a>
+            <a href="{{ url_for('index', filter='popular') }}"
+                class="btn btn-outline-success {% if filter_type == 'popular' %}active{% endif %}">Popular</a>
         </div>
-        <p class="mb-1">{{ question.description | truncate(100) | safe }}</p>
-        <small>
-          <strong>Tags:</strong>
-          {% for tag in question.tags | tag_list %}
-            <span class="badge bg-secondary me-1">{{ tag }}</span>
-          {% endfor %}
-          <span class="text-muted float-end">by {{ question.author.username }}</span>
-        </small>
-      </a>
-      {% endfor %}
     </div>
-  {% else %}
-    <div class="alert alert-info">No questions have been posted yet. Be the first to <a href="{{ url_for('ask_question') }}">ask one</a>!</div>
-  {% endif %}
+    {% if questions %}
+    <div class="list-group">
+        {% for question in questions %}
+        <a href="{{ url_for('view_question', question_id=question.id) }}"
+            class="list-group-item list-group-item-action mb-2 shadow-sm">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ question.title }}</h5>
+                <small>{{ question.created_at.strftime('%Y-%m-%d') }}</small>
+            </div>
+            <p class="mb-1">{{ question.description | truncate(100) | safe }}</p>
+            <small>
+                <strong>Tags:</strong>
+                {% for tag in question.tags | tag_list %}
+                <span class="badge bg-secondary me-1">{{ tag }}</span>
+                {% endfor %}
+                <span class="text-muted float-end">by {{ question.author.username }}</span>
+            </small>
+        </a>
+        {% endfor %}
+    </div>
+    {% if total > per_page %}
+    <nav aria-label="Question navigation">
+        <ul class="pagination justify-content-center mt-4">
+            {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('index', filter=filter_type, page=page-1) }}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            <li class="page-item disabled"><span class="page-link">Page {{ page }}</span></li>
+
+            {% if total > page * per_page %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('index', filter=filter_type, page=page+1) }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-info">No questions have been posted yet. Be the first to <a
+            href="{{ url_for('ask_question') }}">ask one</a>!</div>
+    {% endif %}
 </div>
 {% endblock %}
