@@ -84,9 +84,35 @@ def load_user(user_id):
 # Routes
 @app.route('/')
 def index():
-    """Home page - displays all questions"""
-    questions = Question.query.order_by(Question.created_at.desc()).all()
-    return render_template('index.html', questions=questions)
+    filter_type = request.args.get('filter', 'newest')
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
+    base_query = Question.query
+
+    if filter_type == 'unanswered':
+        questions = base_query.all()
+        unanswered = [q for q in questions if len(q.answers) == 0]
+        total = len(unanswered)
+        paginated_questions = unanswered[(page - 1) * per_page: page * per_page]
+    elif filter_type == 'popular':
+        questions = base_query.all()
+        sorted_questions = sorted(questions, key=lambda q: sum(a.vote_score for a in q.answers), reverse=True)
+        total = len(sorted_questions)
+        paginated_questions = sorted_questions[(page - 1) * per_page: page * per_page]
+    else:  # newest
+        pagination = base_query.order_by(Question.created_at.desc()).paginate(page=page, per_page=per_page)
+        paginated_questions = pagination.items
+        total = pagination.total
+
+    return render_template(
+        'index.html',
+        questions=paginated_questions,
+        filter_type=filter_type,
+        page=page,
+        per_page=per_page,
+        total=total
+    )
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -211,38 +237,40 @@ def view_question(question_id):
 def post_answer(question_id):
     """Post an answer to a question"""
     content = request.form['content']
-    
+
     answer = Answer(
         content=content,
         question_id=question_id,
         user_id=current_user.id
     )
     db.session.add(answer)
-        # Detect @mentions and notify those users
+
+    # Fetch question
+    question = Question.query.get(question_id)
+
+    # Notify question owner
+    if question.user_id != current_user.id:
+        db.session.add(Notification(
+            user_id=question.user_id,
+            message=f'{current_user.username} answered your question: {question.title[:50]}...'
+        ))
+
+    # Notify mentioned users
     import re
     mentions = re.findall(r'@(\w+)', content)
     for username in mentions:
         mentioned_user = User.query.filter_by(username=username).first()
         if mentioned_user and mentioned_user.id != current_user.id:
-            mention_note = Notification(
+            db.session.add(Notification(
                 user_id=mentioned_user.id,
                 message=f'{current_user.username} mentioned you in an answer.'
-            )
-            db.session.add(mention_note)
+            ))
+
     db.session.commit()
-    
-    # Create notification for question author
-    question = Question.query.get(question_id)
-    if question.user_id != current_user.id:
-        notification = Notification(
-            user_id=question.user_id,
-            message=f'{current_user.username} answered your question: {question.title[:50]}...'
-        )
-        db.session.add(notification)
-        db.session.commit()
-    
+
     flash('Answer posted successfully!')
     return redirect(url_for('view_question', question_id=question_id))
+
 
 @app.route('/vote/<int:answer_id>/<vote_type>', methods=['POST'])
 @login_required
@@ -367,6 +395,25 @@ def delete_question(question_id):
     
     flash('Question deleted successfully')
     return redirect(url_for('admin_dashboard'))
+
+@app.route('/api/notifications')
+@login_required
+def api_notifications():
+    unread = Notification.query.filter_by(user_id=current_user.id, is_read=False).order_by(Notification.created_at.desc()).all()
+    recent = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(10).all()
+
+    # Mark all as read (optional: disable if you want per-click control)
+    for note in unread:
+        note.is_read = True
+    db.session.commit()
+
+    return jsonify({
+        "unread_count": len(unread),
+        "notifications": [
+            {"message": n.message, "created_at": n.created_at.strftime('%Y-%m-%d %H:%M')}
+            for n in recent
+        ]
+    })
 
 # Template filters
 @app.template_filter('truncate')
