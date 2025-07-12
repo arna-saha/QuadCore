@@ -16,8 +16,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'your_email@gmail.com'  # replace
-app.config['MAIL_PASSWORD'] = 'your_app_password'     # use app password
+app.config['MAIL_USERNAME'] = 'debtanuroy82@gmail.com'  # replace
+app.config['MAIL_PASSWORD'] = 'uijy gfzf qycj nuon'     # use app password
 
 mail = Mail(app)
 
