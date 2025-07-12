@@ -8,7 +8,7 @@ Anwesa Ghosh- anwesa310@gmail.com,
 Dewan Habib- dewanhabib2004@gmail.com
 
 # 🧠 StackIt - A Minimal Q&A Forum Platform: 
-Website link: https://quadcore-stackit-platform.onrender.com
+Website will be available at: https://quadcore-stackit-platform.onrender.com
 
 **StackIt** is a lightweight, responsive Question-and-Answer platform built with **Flask**, designed for collaborative learning, academic discussions, and community-driven knowledge sharing.
 
@@ -105,10 +105,6 @@ Make sure to [enable 2FA and generate an App Password on Gmail](https://myaccoun
 ```bash
 python app.py
 ```
-
-App will be available at:  
-🔗 `http://127.0.0.1:5000`
-
 ---
 
 ## 🌐 Deployment (Render)
